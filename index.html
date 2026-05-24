@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Bank | Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Greyish Background */
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* The Dark Navbar from previous design */
+        .navbar {
+            background-color: #212529 !important;
+        }
+
+        /* Curved App Name Header */
+        .curved-header {
+            background: linear-gradient(45deg, #8b0000, #dc3545);
+            color: white;
+            padding: 40px 0 70px 0;
+            clip-path: ellipse(120% 100% at 50% 0%);
+            text-align: center;
+        }
+
+        /* Action Buttons & Cards */
+        .card-hover {
+            transition: 0.3s;
+            border: none;
+            border-radius: 15px;
+            background: white;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-emergency {
+            background-color: #dc3545;
+            color: white;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+
+        .btn-emergency:hover {
+            background-color: #a71d2a;
+            color: white;
+        }
+
+        /* Footer at the very bottom */
+        .footer-desc {
+            background-color: #ffffff;
+            border-top: 1px solid #dee2e6;
+            padding: 40px 0;
+            margin-top: auto;
+        }
+
+        /* ── Hamburger Button ── */
+        #menuToggleBtn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        #menuToggleBtn:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        #menuToggleBtn span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+
+        /* ── About Modal Overlay ── */
+        #aboutModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(4px);
+            animation: fadeInOverlay 0.25s ease;
+        }
+        #aboutModal.show {
+            display: flex;
+        }
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .about-card {
+            background: #fff;
+            border-radius: 20px;
+            max-width: 480px;
+            width: 90%;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes slideUp {
+            from { transform: translateY(40px) scale(0.95); opacity: 0; }
+            to   { transform: translateY(0) scale(1);      opacity: 1; }
+        }
+
+        .about-header {
+            background: linear-gradient(135deg, #8b0000, #dc3545);
+            color: white;
+            padding: 28px 30px 22px;
+            position: relative;
+            text-align: center;
+        }
+        .about-header .logo-icon {
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .about-header h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0 0 4px;
+            letter-spacing: 1px;
+        }
+        .about-header p {
+            font-size: 0.82rem;
+            opacity: 0.85;
+            margin: 0;
+            font-style: italic;
+        }
+        .about-close {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 1rem;
+            cursor: pointer;
+            line-height: 30px;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        .about-close:hover {
+            background: rgba(255,255,255,0.35);
+        }
+
+        .about-body {
+            padding: 24px 30px 28px;
+        }
+
+        .about-section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #dc3545;
+            margin-bottom: 8px;
+        }
+
+        .about-desc {
+            font-size: 0.9rem;
+            color: #444;
+            line-height: 1.65;
+            margin-bottom: 20px;
+        }
+
+        .about-quote {
+            background: linear-gradient(135deg, #fff5f5, #ffe8e8);
+            border-left: 4px solid #dc3545;
+            border-radius: 0 10px 10px 0;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+        }
+        .about-quote p {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #8b0000;
+            margin: 0;
+            font-style: italic;
+        }
+        .about-quote span {
+            font-size: 0.75rem;
+            color: #999;
+            font-style: normal;
+        }
+
+        .about-team-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #dc3545;
+            margin-bottom: 10px;
+        }
+        .team-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .team-pill {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 50px;
+            padding: 5px 14px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .team-pill i {
+            color: #dc3545;
+            font-size: 0.75rem;
+        }
+        .about-college {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #999;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <!-- ── Hamburger button (left of brand) ── -->
+            <button id="menuToggleBtn" title="About this project" onclick="openAboutModal()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <a class="navbar-brand fw-bold ms-2" href="#"><i class="fas fa-tint me-2 text-danger"></i>LifeLine Blood Bank</a>
+            <div class="navbar-nav ms-auto">
+                <button id="exitBtn" type="button"
+                    class="btn btn-link btn-sm text-white text-decoration-none p-0">EXIT</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── About Modal ── -->
+    <div id="aboutModal" onclick="closeOnBackdrop(event)">
+        <div class="about-card">
+            <div class="about-header">
+                <button class="about-close" onclick="closeAboutModal()" title="Close">&times;</button>
+                <span class="logo-icon"><i class="fas fa-hand-holding-droplet"></i></span>
+                <h2>LIFE LINE</h2>
+                <p>Blood Bank Management System</p>
+            </div>
+            <div class="about-body">
+                <div class="about-section-title"><i class="fas fa-bullseye me-1"></i>Our Mission</div>
+                <p class="about-desc">
+                    LifeLine is designed to optimize the availability of safe blood. We help hospitals monitor inventory
+                    levels in real-time, connect donors with those in need, and prevent the distribution of expired
+                    units — because every second counts when a life is on the line.
+                </p>
+
+                <div class="about-quote">
+                    <p>"Every drop of blood donated is a life saved — be the reason someone gets a second chance."</p>
+                    <span>— LifeLine Blood Bank</span>
+                </div>
+
+                <div class="about-team-title"><i class="fas fa-users me-1"></i>Meet the Team</div>
+                <div class="team-pills">
+                    <div class="team-pill"><i class="fas fa-user"></i> Adwaith T M</div>
+                    <div class="team-pill"><i class="fas fa-user"></i> Aman Alex M</div>
+                    <div class="team-pill"><i class="fas fa-user"></i> Ameesha Prasanth</div>
+                    <div class="team-pill"><i class="fas fa-user"></i> Anandhu Babu</div>
+                </div>
+
+                <div class="about-college">
+                    <i class="fas fa-university me-1 text-danger"></i>
+                    MAR ATHANASIUS COLLEGE OF ENGINEERING
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <header class="curved-header shadow-sm">
+        <div class="container">
+            <h1 class="fw-bold mb-1"><i class="fas fa-hand-holding-droplet me-2"></i>LIFE LINE</h1>
+            <p class="opacity-75 italic small">"Saving Seconds, Saving Lives."</p>
+        </div>
+    </header>
+
+    <!-- Full Width Emergency Alert Ticker using pure CSS -->
+    <style>
+        .css-ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background-color: #f5e298;
+            color: #000;
+            padding: 10px 0;
+            white-space: nowrap;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .css-ticker-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: ticker-animation 40s linear infinite;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        @keyframes ticker-animation {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+
+    <div class="css-ticker-wrap" id="tickerWrap">
+        <div class="css-ticker-text" id="tickerText">
+            <i class="fas fa-exclamation-circle text-danger me-2"></i> Loading emergency alerts...
+        </div>
+    </div>
+
+    <!-- Emergency Alert Board -->
+    <div class="container mt-4 mb-2" id="emergencyBoard" style="display:none">
+        <div class="card border-danger border-2 shadow-sm">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center py-2">
+                <span class="fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Active Emergency Blood Requests</span>
+                <button class="btn btn-sm btn-outline-light" onclick="document.getElementById('emergencyBoard').style.display='none'">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Hospital</th>
+                                <th>Blood Group</th>
+                                <th>Component</th>
+                                <th>Units</th>
+                                <th>Date</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="emergencyTableBody">
+                            <tr><td colspan="6" class="text-center py-3 text-muted">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-5">
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="card h-100 card-hover p-4 shadow-sm">
+                    <i class="fas fa-user-plus fa-3x text-danger mb-3"></i>
+                    <h3>For Donors</h3>
+                    <p class="text-muted small">Register as a donor and update your donation status.</p>
+                    <a href="donor.html" class="btn btn-outline-danger mt-auto">Access Donor Portal</a>
+                    <a href="appointment.html" class="btn btn-outline-secondary mt-2">
+                        <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 card-hover p-4 shadow-sm d-flex flex-column">
+                    <i class="fas fa-hospital fa-3x text-danger mb-3"></i>
+                    <h3>For Hospitals</h3>
+                    <p class="text-muted small">Place blood requests and monitor inventory levels.</p>
+                    <div class="mt-auto d-grid gap-2">
+                        <a href="request.html" class="btn btn-outline-danger">Access Hospital Portal</a>
+                        <a href="request.html?urgency=emergency" class="btn btn-emergency"><i class="fas fa-ambulance me-2"></i>Emergency Request</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 card-hover p-4 shadow-sm">
+                    <i class="fas fa-flask fa-3x text-danger mb-3"></i>
+                    <h3>Collection Centres</h3>
+                    <p class="text-muted small">Add collected blood units to the inventory system.</p>
+                    <a href="collection.html" class="btn btn-outline-danger mt-auto">Access Collection Portal</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 justify-content-center mb-5 mt-4">
+            <div class="col-md-4">
+                <a href="inventory.html" class="btn btn-info btn-lg w-100 py-3 shadow-sm">
+                    <i class="fas fa-database me-2"></i>VIEW INVENTORY
+                </a>
+            </div>
+            <div class="col-md-4">
+                <button onclick="toggleEmergencyBoard()" class="btn btn-danger btn-lg w-100 py-3 shadow-sm">
+                    <i class="fas fa-exclamation-triangle me-2"></i>EMERGENCY BOARD
+                </button>
+            </div>
+            <div class="col-md-4">
+                <a href="admin.html" class="btn btn-dark btn-lg w-100 py-3 shadow-sm">
+                    <i class="fas fa-user-shield me-2 text-danger"></i>ADMIN PANEL
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-desc">
+        <div class="container text-center">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <h6 class="text-uppercase fw-bold text-muted small mb-3">About</h6>
+                    <p class="text-secondary small px-lg-5">
+                        Designed to optimize the availability of safe blood, this system helps hospitals monitor
+                        inventory levels in real-time and prevent the distribution of expired units. We believe that
+                        technology should serve humanity, specifically by improving patient well-being and healthcare
+                        efficiency
+                    </p>
+                    <hr class="w-25 mx-auto my-4">
+                    <p class="mb-0 fw-bold small text-dark">
+                        Team : Adwaith T M , Aman Alex M , Ameesha Prasanth , Anandhu Babu
+                    </p>
+                    <p class="text-muted x-small mt-1">MAR ATHANASIUS COLLEGE OF ENGINEERING</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API = 'http://localhost:4001/api';
+
+        // ── About Modal functions ──
+        function openAboutModal() {
+            const modal = document.getElementById('aboutModal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeAboutModal() {
+            const modal = document.getElementById('aboutModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        function closeOnBackdrop(e) {
+            if (e.target === document.getElementById('aboutModal')) closeAboutModal();
+        }
+        // Close with Escape key
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeAboutModal();
+        });
+
+        function updateNavbar() {
+            try {
+                const user = JSON.parse(localStorage.getItem('bloodbank_currentUser'));
+                const navbarRight = document.querySelector('.navbar-nav.ms-auto');
+                if (user) {
+                    navbarRight.innerHTML = `
+                        <span class="text-white me-3">Welcome, ${user.name}</span>
+                        <button onclick="logout()" class="btn btn-outline-light btn-sm">Logout</button>
+                    `;
+                }
+            } catch(e) {}
+        }
+
+        function logout() {
+            localStorage.removeItem('bloodbank_currentUser');
+            location.reload();
+        }
+
+        async function loadEmergencyAlerts() {
+            try {
+                const res = await fetch(`${API}/blood-requests`);
+                const all = await res.json();
+                const emergency = all.filter(r => r.status === 'Pending' &&
+                    (r.urgency_level === 'Emergency' || r.urgency_level === 'EMERGENCY'));
+
+                const ticker = document.getElementById('tickerText');
+                if (emergency.length === 0) {
+                    ticker.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i> No active emergency blood requests at this time.';
+                } else {
+                    ticker.innerHTML = emergency.map(r =>
+                        `<i class="fas fa-exclamation-circle text-danger me-2"></i> EMERGENCY: ${r.hospital_name || 'Hospital'} needs ${r.quantity_units} unit(s) of ${r.blood_group} ${r.component_type} &nbsp;&nbsp;&nbsp;`
+                    ).join(' | ');
+                }
+
+                const tbody = document.getElementById('emergencyTableBody');
+                if (emergency.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-muted"><i class="fas fa-check-circle text-success me-1"></i>No active emergency requests</td></tr>';
+                } else {
+                    tbody.innerHTML = emergency.map(r => `
+                        <tr>
+                            <td class="ps-3 fw-bold">${r.hospital_name || '—'}</td>
+                            <td><strong class="text-danger">${r.blood_group}</strong></td>
+                            <td>${r.component_type}</td>
+                            <td><strong>${r.quantity_units}</strong> units</td>
+                            <td class="text-muted small">${r.request_date ? r.request_date.slice(0,10) : '—'}</td>
+                            <td class="text-center">
+                                <a href="donor.html" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-tint me-1"></i>Donate Now
+                                </a>
+                            </td>
+                        </tr>`).join('');
+                }
+            } catch(e) {
+                document.getElementById('tickerText').innerHTML =
+                    '<i class="fas fa-exclamation-circle text-danger me-2"></i> Urgent Blood Alert: Need A+ blood in Ernakulam General Hospital.';
+            }
+        }
+
+        function toggleEmergencyBoard() {
+            const board = document.getElementById('emergencyBoard');
+            board.style.display = board.style.display === 'none' ? 'block' : 'none';
+            if (board.style.display === 'block') {
+                board.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        const exitBtn = document.getElementById('exitBtn');
+        if (exitBtn) {
+            exitBtn.addEventListener('click', () => {
+                const doExit = window.confirm('Exit the app? Unsaved work may be lost.');
+                if (!doExit) return;
+                window.close();
+                setTimeout(() => {
+                    if (!window.closed) window.location.href = 'about:blank';
+                }, 100);
+            });
+        }
+
+        window.onload = () => {
+            updateNavbar();
+            loadEmergencyAlerts();
+            setInterval(loadEmergencyAlerts, 60000);
+        };
+    </script>
+</body>
+
+</html>

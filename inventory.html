@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blood Inventory | LifeLine</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f0f2f5; min-height: 100vh; }
+        .navbar { background-color: #212529 !important; }
+        .status-badge { font-size: 0.8rem; padding: 5px 10px; border-radius: 20px; }
+        .bg-available { background-color: #d1e7dd; color: #0f5132; }
+        .bg-critical   { background-color: #f8d7da; color: #842029; }
+        .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.92rem; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: #6c757d; font-weight: 500; }
+        .detail-value { font-weight: 600; color: #212529; }
+        .blood-badge { width: 60px; height: 60px; border-radius: 12px; background: #f8d7da; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; color: #c0392b; flex-shrink: 0; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html"><i class="fas fa-tint me-2 text-danger"></i>LifeLine</a>
+            <a href="index.html" class="btn btn-outline-light btn-sm">Back to Home</a>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="row g-0">
+
+                <!-- Sidebar Filter -->
+                <div class="col-md-3">
+                    <div class="card border-0 rounded-4 h-100">
+                        <div class="card-header bg-white border-bottom py-3">
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-filter me-2 text-danger"></i>Filter by Group</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-2"><input class="form-check-input blood-filter" type="checkbox" value="A+" onchange="loadInventory()"><label class="form-check-label">A+</label></div>
+                            <div class="form-check mb-2"><input class="form-check-input blood-filter" type="checkbox" value="A-" onchange="loadInventory()"><label class="form-check-label">A-</label></div>
+                            <div class="form-check mb-2"><input class="form-check-input blood-filter" type="checkbox" value="B+" onchange="loadInventory()"><label class="form-check-label">B+</label></div>
+                            <div class="form-check mb-2"><input class="form-check-input blood-filter" type="checkbox" value="B-" onchange="loadInventory()"><label class="form-check-label">B-</label></div>
+                            <div class="form-check mb-2"><input class="form-check-input blood-filter" type="checkbox" value="O+" onchange="loadInventory()"><label class="form-check-label">O+</label></div>
+                            <div class="form-check mb-2"><input class="form-check-input blood-filter" type="checkbox" value="O-" onchange="loadInventory()"><label class="form-check-label">O-</label></div>
+                            <div class="form-check mb-2"><input class="form-check-input blood-filter" type="checkbox" value="AB+" onchange="loadInventory()"><label class="form-check-label">AB+</label></div>
+                            <div class="form-check mb-2"><input class="form-check-input blood-filter" type="checkbox" value="AB-" onchange="loadInventory()"><label class="form-check-label">AB-</label></div>
+                            <hr>
+                            <button class="btn btn-outline-secondary btn-sm w-100"
+                                onclick="document.querySelectorAll('.blood-filter').forEach(cb=>cb.checked=false);loadInventory();">
+                                Clear Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Table -->
+                <div class="col-md-9">
+                    <div class="card border-0 rounded-4 h-100">
+                        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0 fw-bold">Current Blood Inventory</h4>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="loadInventory()">
+                                <i class="fas fa-sync-alt me-1"></i>Refresh
+                            </button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-4">Blood Group</th>
+                                            <th>Component</th>
+                                            <th>Units</th>
+                                            <th>Status</th>
+                                            <th class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="inventoryTableBody">
+                                        <tr>
+                                            <td colspan="5" class="text-center py-5">
+                                                <div class="spinner-border text-danger mb-2" role="status"></div>
+                                                <p class="text-muted">Loading inventory...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-info-circle me-2 text-danger"></i>Blood Unit Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Blood group header card -->
+                    <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3">
+                        <div class="blood-badge" id="modalBloodBadge">—</div>
+                        <div>
+                            <div class="fw-bold fs-5" id="modalTitle">—</div>
+                            <div class="text-muted small" id="modalSubtitle">—</div>
+                        </div>
+                    </div>
+                    <!-- Detail rows -->
+                    <div id="modalDetails"></div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <a href="request.html" class="btn btn-danger">
+                        <i class="fas fa-ambulance me-2"></i>Request This Blood
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let inventoryData = [];
+
+        function formatDate(val) {
+            if (!val) return 'Not specified';
+            try {
+                const d = new Date(val);
+                if (isNaN(d)) return 'Not specified';
+                return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+            } catch(e) { return val; }
+        }
+
+        function isExpired(dateVal) {
+            if (!dateVal) return false;
+            return new Date(dateVal) < new Date();
+        }
+
+        function isExpiringSoon(dateVal) {
+            if (!dateVal) return false;
+            const expiry = new Date(dateVal);
+            const today = new Date();
+            const diffDays = (expiry - today) / (1000 * 60 * 60 * 24);
+            return diffDays <= 30 && diffDays > 0;
+        }
+
+        function showDetails(idx) {
+            const item = inventoryData[idx];
+            if (!item) return;
+
+            const qty = parseInt(item.quantity) || 0;
+            const expiredFlag  = isExpired(item.expiry_date);
+            const soonFlag     = isExpiringSoon(item.expiry_date);
+
+            let expiryHtml = formatDate(item.expiry_date);
+            if (expiredFlag)  expiryHtml += ' <span class="badge bg-danger ms-1">Expired</span>';
+            else if (soonFlag) expiryHtml += ' <span class="badge bg-warning text-dark ms-1">Expiring Soon</span>';
+
+            document.getElementById('modalBloodBadge').textContent = item.blood_group;
+            document.getElementById('modalTitle').textContent = `${item.blood_group} — ${item.component_type}`;
+            document.getElementById('modalSubtitle').textContent = qty > 0 ? `${qty} unit(s) available` : 'Out of stock';
+
+            document.getElementById('modalDetails').innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-tint me-2 text-danger"></i>Blood Group</span>
+                    <span class="detail-value">${item.blood_group}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-vials me-2 text-primary"></i>Component Type</span>
+                    <span class="detail-value">${item.component_type}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-cubes me-2 text-success"></i>Units in Stock</span>
+                    <span class="detail-value">${qty} unit(s)</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-check-circle me-2 text-success"></i>Status</span>
+                    <span class="detail-value">${item.status || 'Available'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-calendar-plus me-2 text-info"></i>Collection Date</span>
+                    <span class="detail-value">${formatDate(item.collection_date)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label"><i class="fas fa-calendar-times me-2 text-warning"></i>Expiry Date</span>
+                    <span class="detail-value">${expiryHtml}</span>
+                </div>
+            `;
+
+            new bootstrap.Modal(document.getElementById('detailsModal')).show();
+        }
+
+        async function loadInventory() {
+            const tableBody = document.getElementById('inventoryTableBody');
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4">
+                <div class="spinner-border text-danger" role="status"></div></td></tr>`;
+
+            let data = [];
+            try {
+                const res = await fetch('http://localhost:4001/api/inventory');
+                if (!res.ok) throw new Error('Backend disconnected');
+                data = await res.json();
+            } catch(e) {
+                try { data = JSON.parse(localStorage.getItem('bloodbank_inventory')) || []; }
+                catch(e2) { data = []; }
+            }
+
+            inventoryData = data;
+
+            const checked = Array.from(document.querySelectorAll('.blood-filter:checked')).map(cb => cb.value);
+            const filtered = checked.length > 0 ? data.filter(i => checked.includes(i.blood_group)) : data;
+
+            if (filtered.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted"><i class="fas fa-database me-2"></i>No inventory data found.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = filtered.map(item => {
+                const status = item.status || (parseInt(item.quantity) > 0 ? 'Available' : 'Critical');
+                const statusClass = status === 'Available' ? 'bg-available' : 'bg-critical';
+                const idx = inventoryData.indexOf(item);
+
+                let expiryTag = '';
+                if (isExpired(item.expiry_date))
+                    expiryTag = ' <span class="badge bg-danger" style="font-size:0.65rem">Expired</span>';
+                else if (isExpiringSoon(item.expiry_date))
+                    expiryTag = ' <span class="badge bg-warning text-dark" style="font-size:0.65rem">Expiring Soon</span>';
+
+                return `
+                <tr>
+                    <td class="ps-4 fw-bold text-danger">${item.blood_group}</td>
+                    <td>${item.component_type}</td>
+                    <td><strong>${parseInt(item.quantity)||0}</strong></td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${status}</span>
+                        ${expiryTag}
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-dark" onclick="showDetails(${idx})">
+                            <i class="fas fa-info-circle me-1"></i>View Details
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        window.onload = loadInventory;
+    </script>
+</body>
+</html>

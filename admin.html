@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel | LifeLine Blood Bank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --navbar: #212529;
+            --red: #c0392b;
+            --red-dark: #a93226;
+            --red-light: rgba(192,57,43,0.1);
+            --cyan: #00bcd4;
+            --cyan-light: rgba(0,188,212,0.1);
+            --bg: #f0f2f5;
+            --white: #ffffff;
+            --text: #212529;
+            --muted: #6c757d;
+            --border: #dee2e6;
+            --success: #28a745;
+            --success-light: rgba(40,167,69,0.1);
+            --warning: #e67e22;
+            --warning-light: rgba(230,126,34,0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* ── LOGIN ── */
+        #loginScreen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+        }
+
+        .login-card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #c0392b 0%, #922b21 100%);
+            padding: 32px;
+            text-align: center;
+            color: white;
+        }
+        .login-header .brand {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+        .login-header p { opacity: 0.85; font-size: 0.9rem; margin-top: 4px; }
+
+        .login-body { padding: 32px; }
+
+        .form-label { font-size: 0.82rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+
+        .form-control {
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.93rem;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(192,57,43,0.12); outline: none; }
+
+        .btn-login {
+            background: linear-gradient(135deg, #c0392b, #922b21);
+            border: none;
+            color: white;
+            font-weight: 700;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+            letter-spacing: 0.03em;
+        }
+        .btn-login:hover { opacity: 0.92; transform: translateY(-1px); }
+
+        /* ── DASHBOARD ── */
+        #dashboard { display: none; }
+
+        /* TOPBAR */
+        .topbar {
+            background: var(--navbar);
+            color: white;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 200;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .topbar-brand {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .topbar-brand i { color: var(--red); }
+        .topbar-right { display: flex; align-items: center; gap: 16px; font-size: 0.88rem; }
+        .topbar-right span { opacity: 0.75; }
+
+        .btn-topbar-logout {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            padding: 5px 14px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-topbar-logout:hover { background: rgba(255,255,255,0.1); }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            left: 0; top: 56px; bottom: 0;
+            width: 210px;
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            padding: 16px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 20px;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-left: 3px solid transparent;
+            transition: all 0.15s;
+            font-weight: 500;
+        }
+        .nav-item:hover { color: var(--text); background: var(--bg); }
+        .nav-item.active { color: var(--red); background: var(--red-light); border-left-color: var(--red); font-weight: 600; }
+        .nav-item i { width: 18px; text-align: center; }
+
+        .nav-section-label {
+            padding: 16px 20px 6px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #adb5bd;
+            font-weight: 600;
+        }
+
+        /* MAIN */
+        .main-content {
+            margin-left: 210px;
+            margin-top: 56px;
+            padding: 28px;
+            min-height: calc(100vh - 56px);
+        }
+
+        .page-header { margin-bottom: 24px; }
+        .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text); }
+        .page-header p { color: var(--muted); font-size: 0.9rem; margin-top: 3px; }
+
+        /* STAT CARDS */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+            border-top: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .stat-card.red { border-top-color: var(--red); }
+        .stat-card.cyan { border-top-color: var(--cyan); }
+        .stat-card.green { border-top-color: var(--success); }
+        .stat-card.orange { border-top-color: var(--warning); }
+
+        .stat-icon {
+            width: 48px; height: 48px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .stat-icon.red { background: var(--red-light); color: var(--red); }
+        .stat-icon.cyan { background: var(--cyan-light); color: var(--cyan); }
+        .stat-icon.green { background: var(--success-light); color: var(--success); }
+        .stat-icon.orange { background: var(--warning-light); color: var(--warning); }
+
+        .stat-info .value { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+        .stat-info .label { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+        /* CARD */
+        .card {
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+            border: none;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .card-header-custom {
+            padding: 14px 20px;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .card-header-custom h5 { font-size: 1rem; font-weight: 700; margin: 0; }
+
+        /* TABS */
+        .tab-row {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--white);
+            gap: 4px;
+        }
+        .tab-btn {
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.15s;
+        }
+        .tab-btn.active { color: var(--red); border-bottom-color: var(--red); font-weight: 600; }
+        .tab-btn:hover:not(.active) { color: var(--text); }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            padding: 10px 16px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+        tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.1s; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #fafafa; }
+        tbody td { padding: 12px 16px; font-size: 0.88rem; vertical-align: middle; }
+
+        /* BADGES */
+        .badge-pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-approved { background: #d1e7dd; color: #0f5132; }
+        .badge-rejected { background: #f8d7da; color: #842029; }
+        .badge-available { background: #d1e7dd; color: #0f5132; }
+        .badge-issued { background: #cff4fc; color: #055160; }
+        .badge-emergency { background: #f8d7da; color: #842029; }
+        .badge-normal { background: #e2e3e5; color: #41464b; }
+
+        .blood-tag { font-weight: 700; color: var(--red); font-size: 0.95rem; }
+
+        /* ACTION BUTTONS */
+        .btn-approve {
+            background: #d1e7dd; border: 1px solid #a3cfbb;
+            color: #0f5132; padding: 4px 12px;
+            border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+            cursor: pointer; transition: all 0.15s; margin-right: 4px;
+        }
+        .btn-approve:hover { background: #a3cfbb; }
+
+        .btn-reject {
+            background: #f8d7da; border: 1px solid #f1aeb5;
+            color: #842029; padding: 4px 12px;
+            border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .btn-reject:hover { background: #f1aeb5; }
+
+        .btn-refresh {
+            background: white; border: 1px solid var(--border);
+            color: var(--muted); padding: 6px 14px;
+            border-radius: 6px; font-size: 0.82rem;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .btn-refresh:hover { border-color: var(--red); color: var(--red); }
+
+        /* EMPTY / LOADING */
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+        .empty-state i { font-size: 2rem; margin-bottom: 12px; display: block; color: #ced4da; }
+        .loading-row td { text-align: center; padding: 40px; color: var(--muted); }
+
+        /* SECTION */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* UNITS BAR */
+        .units-bar { display: flex; align-items: center; gap: 8px; }
+        .units-track { flex: 1; height: 5px; background: #e9ecef; border-radius: 3px; overflow: hidden; max-width: 80px; }
+        .units-fill { height: 100%; background: var(--success); border-radius: 3px; }
+
+        /* TOAST */
+        #toast {
+            position: fixed; bottom: 24px; right: 24px;
+            background: white; border-radius: 8px;
+            padding: 12px 20px; font-size: 0.88rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            z-index: 9999; opacity: 0; transform: translateY(8px);
+            transition: all 0.25s; max-width: 320px;
+            border-left: 4px solid var(--success);
+        }
+        #toast.show { opacity: 1; transform: translateY(0); }
+        #toast.error { border-left-color: var(--red); }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="brand"><i class="fas fa-tint me-2"></i>LifeLine Blood Bank</div>
+            <p>Admin &amp; Staff Portal</p>
+        </div>
+        <div class="login-body">
+            <div class="mb-3">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="loginEmail" placeholder="staff@lifeline.com">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" id="loginPassword" placeholder="••••••••">
+            </div>
+            <button class="btn-login" onclick="doLogin()">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In to Dashboard
+            </button>
+            <p id="loginError" style="color:var(--red);font-size:0.83rem;margin-top:12px;display:none;text-align:center;"></p>
+        </div>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div class="topbar-brand">
+            <i class="fas fa-tint"></i> LifeLine Blood Bank
+        </div>
+        <div class="topbar-right">
+            <span><i class="fas fa-user-shield me-1"></i>Welcome, <strong id="adminName">Admin</strong></span>
+            <button class="btn-topbar-logout" onclick="doLogout()"><i class="fas fa-sign-out-alt me-1"></i>Logout</button>
+            <a href="index.html" class="btn-topbar-logout">Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="nav-section-label">Management</div>
+        <div class="nav-item active" onclick="showSection('requests', this)">
+            <i class="fas fa-inbox"></i> Blood Requests
+        </div>
+        <div class="nav-item" onclick="showSection('inventory', this)">
+            <i class="fas fa-layer-group"></i> Inventory
+        </div>
+        <div class="nav-item" onclick="showSection('issued', this)">
+            <i class="fas fa-check-double"></i> Issue History
+        </div>
+        <div class="nav-item" onclick="showSection('appointments', this)">
+            <i class="fas fa-calendar-alt"></i> Appointments
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main-content">
+
+        <!-- Stats -->
+        <div class="stat-grid">
+            <div class="stat-card red">
+                <div class="stat-icon red"><i class="fas fa-clock"></i></div>
+                <div class="stat-info">
+                    <div class="value" id="statPending">—</div>
+                    <div class="label">Pending Requests</div>
+                </div>
+            </div>
+            <div class="stat-card cyan">
+                <div class="stat-icon cyan"><i class="fas fa-tint"></i></div>
+                <div class="stat-info">
+                    <div class="value" id="statAvailable">—</div>
+                    <div class="label">Available Units</div>
+                </div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="stat-info">
+                    <div class="value" id="statEmergency">—</div>
+                    <div class="label">Emergency Cases</div>
+                </div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <div class="value" id="statIssued">—</div>
+                    <div class="label">Issued Today</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REQUESTS -->
+        <div class="section active" id="section-requests">
+            <div class="page-header">
+                <h1><i class="fas fa-inbox me-2 text-danger"></i>Blood Requests</h1>
+                <p>Review and approve incoming hospital blood requests</p>
+            </div>
+            <div class="card">
+                <div class="tab-row">
+                    <button class="tab-btn active" onclick="switchTab('pending', this)">
+                        <i class="fas fa-clock me-1"></i>Pending
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('approved', this)">
+                        <i class="fas fa-check me-1"></i>Approved
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('rejected', this)">
+                        <i class="fas fa-times me-1"></i>Rejected
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('all', this)">All</button>
+                    <button class="btn-refresh ms-auto" style="margin:8px 0" onclick="loadRequests()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Hospital</th>
+                                <th>Blood Group</th>
+                                <th>Component</th>
+                                <th>Units</th>
+                                <th>Urgency</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestsBody">
+                            <tr class="loading-row"><td colspan="9"><i class="fas fa-spinner fa-spin me-2"></i>Loading requests...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- INVENTORY -->
+        <div class="section" id="section-inventory">
+            <div class="page-header">
+                <h1><i class="fas fa-layer-group me-2 text-danger"></i>Blood Inventory</h1>
+                <p>Current stock levels by blood group and component type</p>
+            </div>
+            <div class="card">
+                <div class="card-header-custom">
+                    <h5>Stock Overview</h5>
+                    <button class="btn-refresh" onclick="loadInventory()"><i class="fas fa-sync-alt me-1"></i>Refresh</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Blood Group</th>
+                                <th>Component Type</th>
+                                <th>Units Available</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryBody">
+                            <tr class="loading-row"><td colspan="4"><i class="fas fa-spinner fa-spin me-2"></i>Loading inventory...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ISSUED -->
+        <div class="section" id="section-issued">
+            <div class="page-header">
+                <h1><i class="fas fa-check-double me-2 text-danger"></i>Issue History</h1>
+                <p>All blood units dispatched to hospitals</p>
+            </div>
+            <div class="card">
+                <div class="card-header-custom">
+                    <h5>Dispatch Log</h5>
+                    <button class="btn-refresh" onclick="loadIssued()"><i class="fas fa-sync-alt me-1"></i>Refresh</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Issue ID</th>
+                                <th>Hospital</th>
+                                <th>Blood Group</th>
+                                <th>Component</th>
+                                <th>Unit ID</th>
+                                <th>Issue Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="issuedBody">
+                            <tr class="loading-row"><td colspan="6"><i class="fas fa-spinner fa-spin me-2"></i>Loading history...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- APPOINTMENTS -->
+        <div class="section" id="section-appointments">
+            <div class="page-header">
+                <h1><i class="fas fa-calendar-alt me-2 text-danger"></i>Donor Appointments</h1>
+                <p>View and manage all donor appointment bookings</p>
+            </div>
+            <div class="card">
+                <div class="card-header-custom">
+                    <h5>All Appointments</h5>
+                    <button class="btn-refresh" onclick="loadAppointments()"><i class="fas fa-sync-alt me-1"></i>Refresh</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Donor Name</th>
+                                <th>Blood Group</th>
+                                <th>Email</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsBody">
+                            <tr class="loading-row"><td colspan="7"><i class="fas fa-spinner fa-spin me-2"></i>Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+    const API = 'http://localhost:4001/api';
+    let currentUser = null;
+    let currentTab = 'pending';
+    let allRequests = [];
+
+    // ── AUTH ──
+    async function doLogin() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const errEl = document.getElementById('loginError');
+        errEl.style.display = 'none';
+        if (!email) { errEl.textContent = 'Email is required'; errEl.style.display = 'block'; return; }
+        try {
+            const res = await fetch(`${API}/staff/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (!res.ok) { errEl.textContent = data.error || 'Login failed'; errEl.style.display = 'block'; return; }
+            currentUser = data.staff;
+            document.getElementById('adminName').textContent = currentUser.staff_name || currentUser.email;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            loadAll();
+        } catch (e) {
+            errEl.textContent = 'Cannot connect to server. Is it running on port 4001?';
+            errEl.style.display = 'block';
+        }
+    }
+
+    function doLogout() {
+        currentUser = null;
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('dashboard').style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('loginPassword').addEventListener('keydown', e => {
+            if (e.key === 'Enter') doLogin();
+        });
+    });
+
+    // ── NAVIGATION ──
+    function showSection(name, el) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('section-' + name).classList.add('active');
+        el.classList.add('active');
+        if (name === 'inventory') loadInventory();
+        else if (name === 'issued') loadIssued();
+        else loadRequests();
+    }
+
+    function switchTab(tab, el) {
+        currentTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        renderRequests();
+    }
+
+    // ── LOAD ALL ──
+    function loadAll() { loadRequests(); loadStats(); }
+
+    // ── STATS ──
+    async function loadStats() {
+        try {
+            const [reqRes, invRes] = await Promise.all([
+                fetch(`${API}/blood-requests`),
+                fetch(`${API}/inventory`)
+            ]);
+            const requests = await reqRes.json();
+            const inventory = await invRes.json();
+            document.getElementById('statPending').textContent = requests.filter(r => r.status === 'Pending').length;
+            document.getElementById('statEmergency').textContent = requests.filter(r => r.status === 'Pending' && r.urgency_level === 'Emergency').length;
+            document.getElementById('statAvailable').textContent = inventory.reduce((s, i) => s + Number(i.quantity || 0), 0);
+            try {
+                const issRes = await fetch(`${API}/blood-issues`);
+                const issues = await issRes.json();
+                const today = new Date().toISOString().slice(0, 10);
+                document.getElementById('statIssued').textContent = issues.filter(i => i.issue_date && i.issue_date.slice(0,10) === today).length;
+            } catch(e) { document.getElementById('statIssued').textContent = '0'; }
+        } catch (e) { console.error('Stats error', e); }
+    }
+
+    // ── REQUESTS ──
+    async function loadRequests() {
+        try {
+            const res = await fetch(`${API}/blood-requests`);
+            allRequests = await res.json();
+            renderRequests();
+            loadStats();
+        } catch (e) {
+            document.getElementById('requestsBody').innerHTML =
+                `<tr class="loading-row"><td colspan="9" style="color:var(--red)"><i class="fas fa-exclamation-circle me-2"></i>Failed to load. Is the server running?</td></tr>`;
+        }
+    }
+
+    function renderRequests() {
+        const filtered = currentTab === 'all' ? allRequests : allRequests.filter(r => r.status.toLowerCase() === currentTab);
+        const tbody = document.getElementById('requestsBody');
+        if (!filtered.length) {
+            tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><i class="fas fa-inbox"></i>No ${currentTab} requests found</div></td></tr>`;
+            return;
+        }
+        tbody.innerHTML = filtered.map(r => `
+            <tr>
+                <td style="color:var(--muted);font-size:0.78rem">#${r.request_id}</td>
+                <td><strong>${r.hospital_name || 'Unknown'}</strong></td>
+                <td><span class="blood-tag">${r.blood_group}</span></td>
+                <td>${r.component_type}</td>
+                <td><strong>${r.quantity_units}</strong> units</td>
+                <td><span class="badge-pill badge-${r.urgency_level === 'Emergency' ? 'emergency' : 'normal'}">${r.urgency_level || 'Normal'}</span></td>
+                <td style="color:var(--muted);font-size:0.82rem">${r.request_date ? r.request_date.slice(0,10) : '—'}</td>
+                <td><span class="badge-pill badge-${r.status.toLowerCase()}">${r.status}</span></td>
+                <td>
+                    ${r.status === 'Pending' ? `
+                        <button class="btn-approve" onclick="approveRequest(${r.request_id})"><i class="fas fa-check me-1"></i>Approve</button>
+                        <button class="btn-reject" onclick="rejectRequest(${r.request_id})"><i class="fas fa-times me-1"></i>Reject</button>
+                    ` : `<span style="color:var(--muted);font-size:0.8rem">—</span>`}
+                </td>
+            </tr>`).join('');
+    }
+
+    async function approveRequest(requestId) {
+        if (!confirm(`Approve request #${requestId}?\nThis will mark matching blood units as Issued.`)) return;
+        try {
+            const res = await fetch(`${API}/blood-requests/${requestId}/approve`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ staffId: currentUser?.staff_id || 1 })
+            });
+            const data = await res.json();
+            if (!res.ok) { showToast(data.error || 'Approval failed', 'error'); return; }
+            showToast(data.message || 'Request approved!', 'success');
+            loadRequests();
+        } catch (e) { showToast('Server error', 'error'); }
+    }
+
+    async function rejectRequest(requestId) {
+        if (!confirm(`Reject request #${requestId}?`)) return;
+        try {
+            const res = await fetch(`${API}/blood-requests/${requestId}/reject`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (!res.ok) { showToast(data.error || 'Rejection failed', 'error'); return; }
+            showToast('Request rejected.', 'success');
+            loadRequests();
+        } catch (e) { showToast('Server error', 'error'); }
+    }
+
+    // ── INVENTORY ──
+    async function loadInventory() {
+        try {
+            const res = await fetch(`${API}/inventory`);
+            const data = await res.json();
+            const tbody = document.getElementById('inventoryBody');
+            if (!data.length) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><i class="fas fa-layer-group"></i>No inventory data</div></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(item => {
+                const qty = Number(item.quantity || 0);
+                const pct = Math.min(100, (qty / 20) * 100);
+                const status = item.status || (qty > 0 ? 'Available' : 'Critical');
+                return `<tr>
+                    <td><strong class="blood-tag">${item.blood_group}</strong></td>
+                    <td>${item.component_type}</td>
+                    <td>
+                        <div class="units-bar">
+                            <strong>${qty}</strong>
+                            <div class="units-track"><div class="units-fill" style="width:${pct}%"></div></div>
+                        </div>
+                    </td>
+                    <td><span class="badge-pill badge-${status.toLowerCase()}">${status}</span></td>
+                </tr>`;
+            }).join('');
+        } catch (e) {
+            document.getElementById('inventoryBody').innerHTML =
+                `<tr class="loading-row"><td colspan="4" style="color:var(--red)">Failed to load inventory</td></tr>`;
+        }
+    }
+
+    // ── ISSUED ──
+    async function loadIssued() {
+        try {
+            const res = await fetch(`${API}/blood-issues`);
+            const data = await res.json();
+            const tbody = document.getElementById('issuedBody');
+            if (!data.length) {
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-check-double"></i>No issues recorded yet</div></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(i => `
+                <tr>
+                    <td style="color:var(--muted);font-size:0.78rem">#${i.issue_id}</td>
+                    <td>${i.hospital_name || '—'}</td>
+                    <td><span class="blood-tag">${i.blood_group}</span></td>
+                    <td>${i.component_type}</td>
+                    <td style="color:var(--muted)">${i.unit_id}</td>
+                    <td style="color:var(--muted);font-size:0.82rem">${i.issue_date ? i.issue_date.slice(0,10) : '—'}</td>
+                </tr>`).join('');
+        } catch (e) {
+            document.getElementById('issuedBody').innerHTML =
+                `<tr class="loading-row"><td colspan="6" style="color:var(--red)">Failed to load history</td></tr>`;
+        }
+    }
+
+    // ── APPOINTMENTS ──
+    async function loadAppointments() {
+        try {
+            const res = await fetch(`${API}/appointments/all`);
+            const data = await res.json();
+            const tbody = document.getElementById('appointmentsBody');
+            if (!data.length) {
+                tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fas fa-calendar"></i>No appointments yet</div></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(a => `
+                <tr>
+                    <td style="color:var(--muted);font-size:0.78rem">#${a.appointment_id}</td>
+                    <td><strong>${a.first_name} ${a.last_name}</strong></td>
+                    <td><span class="blood-tag">${a.blood_group || '—'}</span></td>
+                    <td style="color:var(--muted);font-size:0.82rem">${a.email}</td>
+                    <td>${a.appointment_date ? a.appointment_date.slice(0,10) : '—'}</td>
+                    <td><span class="badge-pill badge-${(a.status||'pending').toLowerCase()}">${a.status || 'Booked'}</span></td>
+                    <td class="text-center">
+                        ${a.status === 'Booked' ? `
+                            <button class="btn-approve" onclick="completeAppointment(${a.appointment_id})">
+                                <i class="fas fa-check me-1"></i>Complete
+                            </button>` : '—'}
+                    </td>
+                </tr>`).join('');
+        } catch(e) {
+            document.getElementById('appointmentsBody').innerHTML =
+                `<tr class="loading-row"><td colspan="7" style="color:var(--red)">Failed to load appointments</td></tr>`;
+        }
+    }
+
+    async function completeAppointment(id) {
+        if (!confirm(`Mark appointment #${id} as Completed?`)) return;
+        try {
+            const res = await fetch(`${API}/appointments/${id}/complete`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (!res.ok) { showToast(data.error || 'Failed', 'error'); return; }
+            showToast('Appointment marked as completed!', 'success');
+            loadAppointments();
+        } catch(e) { showToast('Server error', 'error'); }
+    }
+
+    // ── TOAST ──
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${msg}`;
+        t.className = `show ${type}`;
+        setTimeout(() => { t.className = ''; }, 3500);
+    }
+</script>
+</body>
+</html>

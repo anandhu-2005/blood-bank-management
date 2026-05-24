@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Appointment | LifeLine Blood Bank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f0f2f5; min-height: 100vh; }
+        .navbar { background-color: #212529 !important; }
+        .status-booked   { background:#d1e7dd; color:#0f5132; }
+        .status-cancelled{ background:#f8d7da; color:#842029; }
+        .status-completed{ background:#cff4fc; color:#055160; }
+        .badge-status { display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html"><i class="fas fa-tint me-2 text-danger"></i>LifeLine</a>
+            <div class="navbar-nav ms-auto">
+                <span id="userGreeting" class="text-white me-3" style="display:none;"></span>
+                <button id="logoutBtn" class="btn btn-outline-light btn-sm" style="display:none;">Logout</button>
+                <a href="donor.html" class="btn btn-outline-light btn-sm ms-2">Back to Donor Portal</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- NOT LOGGED IN -->
+    <div id="notLoggedIn" style="display:none;">
+        <div class="container py-5 text-center">
+            <div class="card shadow-sm border-0 p-5 mx-auto" style="max-width:400px;">
+                <i class="fas fa-lock fa-3x text-danger mb-3"></i>
+                <h5>Please Login First</h5>
+                <p class="text-muted">You need to be logged in as a donor to book an appointment.</p>
+                <a href="donor.html" class="btn btn-danger">Go to Donor Portal</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="mainContent" style="display:none;">
+        <div class="container py-5">
+            <div class="row g-4">
+
+                <!-- Book Appointment Form -->
+                <div class="col-md-5">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-danger text-white py-3">
+                            <h5 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Book an Appointment</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <form id="appointmentForm">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Appointment Date</label>
+                                    <input type="date" class="form-control" id="apptDate" required>
+                                    <div class="form-text text-muted">Must be at least 1 day from today</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Preferred Time</label>
+                                    <select class="form-select" id="apptTime" required>
+                                        <option value="">Select time slot</option>
+                                        <option>09:00 AM</option>
+                                        <option>10:00 AM</option>
+                                        <option>11:00 AM</option>
+                                        <option>12:00 PM</option>
+                                        <option>02:00 PM</option>
+                                        <option>03:00 PM</option>
+                                        <option>04:00 PM</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Donation Centre / Location</label>
+                                    <input type="text" class="form-control" id="apptLocation" placeholder="e.g. Ernakulam General Hospital">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Notes (Optional)</label>
+                                    <textarea class="form-control" id="apptNotes" rows="2" placeholder="Any special instructions or notes..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-danger w-100 py-2">
+                                    <i class="fas fa-calendar-check me-2"></i>Confirm Appointment
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Donor Info Card -->
+                    <div class="card shadow-sm border-0 mt-4">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold mb-3"><i class="fas fa-user me-2 text-danger"></i>Your Info</h6>
+                            <p class="mb-1 small"><span class="text-muted">Name:</span> <strong id="infoName">—</strong></p>
+                            <p class="mb-1 small"><span class="text-muted">Email:</span> <strong id="infoEmail">—</strong></p>
+                            <p class="mb-0 small"><span class="text-muted">Blood Group:</span> <strong id="infoBlood" class="text-danger">—</strong></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointment History -->
+                <div class="col-md-7">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-history me-2 text-danger"></i>My Appointments</h5>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="loadAppointments()">
+                                <i class="fas fa-sync-alt me-1"></i>Refresh
+                            </button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="ps-3">Date</th>
+                                            <th>Time</th>
+                                            <th>Location</th>
+                                            <th>Status</th>
+                                            <th class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="appointmentsBody">
+                                        <tr><td colspan="5" class="text-center py-4 text-muted">
+                                            <i class="fas fa-spinner fa-spin me-2"></i>Loading...
+                                        </td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API = 'http://localhost:4001/api';
+        let currentUser = null;
+
+        function getCurrentUser() {
+            try { return JSON.parse(localStorage.getItem('bloodbank_currentUser')); }
+            catch(e) { return null; }
+        }
+
+        function logout() {
+            localStorage.removeItem('bloodbank_currentUser');
+            window.location.href = 'donor.html';
+        }
+
+        function init() {
+            currentUser = getCurrentUser();
+            if (!currentUser || currentUser.role !== 'donor') {
+                document.getElementById('notLoggedIn').style.display = 'block';
+                return;
+            }
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('userGreeting').textContent = `Welcome, ${currentUser.name}!`;
+            document.getElementById('userGreeting').style.display = 'inline';
+            document.getElementById('logoutBtn').style.display = 'inline-block';
+
+            // Fill donor info card
+            document.getElementById('infoName').textContent = currentUser.name || '—';
+            document.getElementById('infoEmail').textContent = currentUser.email || '—';
+            document.getElementById('infoBlood').textContent = currentUser.bloodGroup || '—';
+
+            // Set min date to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('apptDate').min = tomorrow.toISOString().slice(0, 10);
+
+            loadAppointments();
+        }
+
+        function formatDate(val) {
+            if (!val) return '—';
+            // Handle PostgreSQL date array: could be array or string like "{2026-04-02}"
+            let dateStr = val;
+            if (Array.isArray(val)) dateStr = val[0];
+            if (typeof dateStr === 'string') {
+                dateStr = dateStr.replace(/[{}]/g, '').split(',')[0].trim();
+            }
+            if (!dateStr) return '—';
+            try {
+                const d = new Date(dateStr);
+                return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+            } catch(e) { return dateStr.slice(0,10); }
+        }
+
+        async function loadAppointments() {
+            const tbody = document.getElementById('appointmentsBody');
+            try {
+                const res = await fetch(`${API}/appointments?email=${encodeURIComponent(currentUser.email)}`);
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+
+                if (!data.length) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">
+                        <i class="fas fa-calendar me-2"></i>No appointments yet. Book one!
+                    </td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.map(a => `
+                    <tr>
+                        <td class="ps-3"><strong>${formatDate(a.appointment_date)}</strong></td>
+                        <td>${a.time_slot || '—'}</td>
+                        <td class="text-muted" style="font-size:0.85rem">${a.location || '—'}</td>
+                        <td><span class="badge-status status-${(a.status||'booked').toLowerCase()}">${a.status || 'Booked'}</span></td>
+                        <td class="text-center">
+                            ${a.status === 'Booked' ? `
+                                <button class="btn btn-sm btn-outline-danger" onclick="cancelAppointment(${a.appointment_id})">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </button>` : '—'}
+                        </td>
+                    </tr>`).join('');
+            } catch(e) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-3">
+                    Failed to load appointments: ${e.message}
+                </td></tr>`;
+            }
+        }
+
+        document.getElementById('appointmentForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const date = document.getElementById('apptDate').value;
+            const time = document.getElementById('apptTime').value;
+            const location = document.getElementById('apptLocation').value;
+            const notes = document.getElementById('apptNotes').value;
+
+            try {
+                const res = await fetch(`${API}/appointments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentUser.email, appointmentDate: date, timeSlot: time, location, notes })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+                alert('Appointment booked successfully!');
+                document.getElementById('appointmentForm').reset();
+                loadAppointments();
+            } catch(e) {
+                alert('Error: ' + e.message);
+            }
+        };
+
+        async function cancelAppointment(id) {
+            if (!confirm('Cancel this appointment?')) return;
+            try {
+                const res = await fetch(`${API}/appointments/${id}/cancel`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+                alert('Appointment cancelled.');
+                loadAppointments();
+            } catch(e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        document.getElementById('logoutBtn').onclick = logout;
+        window.onload = init;
+    </script>
+</body>
+</html>
