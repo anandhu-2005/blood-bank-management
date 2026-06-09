@@ -17,6 +17,9 @@ const pool = new Pool({
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
+app.get('/', (req, res) => {
+  res.send('Blood Bank API is running');
+});
 
 // ============ DONORS ============
 app.post('/api/donors/register', async (req, res) => {
@@ -125,9 +128,7 @@ app.post('/api/donors/info', async (req, res) => {
       first_name, last_name, blood_group, phone,
       gender || null, dateOfBirthParam, addressParam, email,
     ]);
-  app.get('/', (req, res) => {
-  res.send('Blood Bank API is running');
-});
+  
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Donor not found, please login first' });
     }
