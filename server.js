@@ -2,10 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static(__dirname));
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -18,7 +20,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 app.get('/', (req, res) => {
-  res.send('Blood Bank API is running');
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // ============ DONORS ============
