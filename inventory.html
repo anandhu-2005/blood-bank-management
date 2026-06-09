@@ -202,7 +202,7 @@
 
             let data = [];
             try {
-                const res = await fetch('http://localhost:4001/api/inventory');
+                const res = await fetch('http://https://blood-bank-management-1-mniq.onrender.com/api/inventory');
                 if (!res.ok) throw new Error('Backend disconnected');
                 data = await res.json();
             } catch(e) {
